@@ -141,7 +141,9 @@ cd ~/your_ros_workspace
 清理构建文件：
 
 ```bash
+sudo rm -rf ~/.ros/*        清理全部ros相关的日志之类的
 rm -rf build install log
+
 ```
 
 👉 可释放数 GB 空间
@@ -379,5 +381,3 @@ sudo apt autoremove
 
 ---
 
-```
-```

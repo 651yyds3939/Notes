@@ -90,28 +90,84 @@ docker run -it --net=host my_robot_project:v1.0 /bin/bash
 
 这些指令必须融入肌肉记忆，是应对开发底层问题的最强武器。
 
-### 5.1 Docker 暴力拆解与挂载寻踪
+---
+
+### 5.1 Docker 深度交互与挂载逻辑控制
+
+这些指令是开发者深入容器底层、解决挂载冲突和环境隔离的最强武器。
+
+#### 1. 运行状态与挂载寻踪（诊断位）
+
+在调试多个工作空间映射时，首先确认“我在哪”以及“物理路径在哪”。
+
 ```bash
-# 1. 揪出正在运行的容器（拿到 CONTAINER ID 或 NAME）
+# 【查看】列出当前正在运行的容器（获取 CONTAINER ID 或 NAME）
 docker ps
 
-# 2. 【核心】像看 X 光片一样，透视容器到底挂载了宿主机的哪个文件夹
+# 【透视】核心：像 X 光片一样，透视容器到底挂载了宿主机的哪个文件夹
+# 过滤掉干扰项，直接定位 Source 物理路径
 docker inspect <容器ID或名字> | grep -C 5 "Source" | grep -v "/dev"
 
-# 3. 在宿主机和容器之间“隔空取物”（假设容器叫 kuavo_container）
-# 从容器往外拿：
-docker cp kuavo_container:/root/fast_lio_ws /home/lwy/
-# 往容器里送：
-docker cp /home/lwy/my_file.txt kuavo_container:/root/
-
-# 4. 钻入正在运行的容器内部
-docker exec -it kuavo_container /bin/bash
 ```
+
+#### 2. 宿主机与容器的“跨空搬运”（数据位）
+
+无需通过 Git 或 U 盘，直接在两个物理隔离的文件系统间传输权重模型或日志。
+
+```bash
+# 从容器往外拿（例：提取训练日志到宿主机）
+docker cp <容器名>:/root/fast_lio_ws /home/lwy/
+
+# 往容器里送（例：把新炼好的 ONNX 模型送入部署环境）
+docker cp /home/lwy/my_file.txt <容器名>:/root/
+
+```
+
+#### 3. 开发环境的一键起航（启动位）
+
+针对 Kuavo 机器人的不同场景，选择最合适的进入方式。
+
+```bash
+# A. 官方快捷方式（依赖仓库内的脚本）
+xhost +local:docker
+./docker/run.sh
+
+# B. 【推荐】手动全功率模式（暴力拆解挂载逻辑，强制开启 GPU 和显示投影）
+docker run -it --rm \
+    --name kuavo_container \
+    --gpus all \
+    --privileged \
+    --network host \
+    --env="DISPLAY" \
+    -v /tmp/.X11-unix:/tmp/.X11-unix:rw \
+    -v $(pwd):/root/kuavo_ws \
+    kuavo_opensource_mpc_wbc_img:1.3.0 \
+    zsh
+
+```
+
+#### 4. 容器生命周期二次进入（管理位）
+
+当容器已存在但处于后台时，无需重新 `run`，直接唤醒。
+
+```bash
+# 唤醒已停止的容器
+docker start kuavo_container
+
+# 以 Zsh 终端身份钻入正在运行的后台容器
+docker exec -it kuavo_container zsh
+
+# (备用) 以 Bash 身份钻入
+docker exec -it kuavo_container /bin/bash
+
+```
+
 
 ### 5.2 docker网络走代理
 ```bash
-export http_proxy=[http://127.0.0.1:7890](http://127.0.0.1:7890)
-export https_proxy=[http://127.0.0.1:7890](http://127.0.0.1:7890)
+clash打开允许局域网连接
+export http_proxy=http://172.17.0.1:7890
+export https_proxy=http://172.17.0.1:7890
 ```
 
 ---
