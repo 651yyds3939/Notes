@@ -133,6 +133,7 @@ xhost +local:docker
 ./docker/run.sh
 
 # B. 【推荐】手动全功率模式（暴力拆解挂载逻辑，强制开启 GPU 和显示投影）
+xhost +local:docker
 docker run -it  \
     --name kuavo_container \
     --gpus all \
@@ -168,6 +169,7 @@ docker exec -it kuavo_container /bin/bash
 
 #删除某个容器，需要先查看已有容器的名字
 docker rm 容器名如：6211bcba5b9e
+docker rm -f
 
 ```
 
