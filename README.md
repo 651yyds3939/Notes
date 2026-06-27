@@ -1,4 +1,8 @@
-# Notes
+
+# Notes（已归档）
+已拆分为：
+- https://github.com/651yyds3939/kuavo-dev-notes
+- https://github.com/651yyds3939/robotics-notes
 
 个人笔记与工程文档仓库。
 
